@@ -61,11 +61,11 @@ At this stage, only the REST API is running, not **xmrig**. To test the function
 
 To start **xmrig**: 
 ```
-$ curl -u xmrig:password -i -X GET "http://192.168.4.69:5000/api/xmrig?action=start"
+$ curl -k -u xmrig:password -i -X GET "https://192.168.4.69:5000/api/xmrig?action=start"
 ```
 To stop **xmrig**:
 ```
-$ curl -u xmrig:password -i -X GET "http://192.168.4.69:5000/api/xmrig?action=stop"
+$ curl -k -u xmrig:password -i -X GET "https://192.168.4.69:5000/api/xmrig?action=stop"
 ```
 
 If there is an instance of **xmrig** already running the *start* action it will not spawn another instance. It checks for an already running process and if true then returns null.
