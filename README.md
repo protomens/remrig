@@ -77,6 +77,9 @@ We have integrated this feature into our **Monerado** app which is available at:
 
 This allows for control of your *xmrig* instances via our app. **Note**: This app is only designed for Monero Ocean at the moment. More pools will be added in the future. 
 
+![https://i.imgur.com/eFTBooF.png](https://i.imgur.com/eFTBooF.png)
+
+
 ### Buy us a coffe (or two)
 
 ![https://i.imgur.com/2eZdcrV.png](https://i.imgur.com/2eZdcrV.png)
