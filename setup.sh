@@ -5,6 +5,20 @@
 #  exit
 #fi
 
+#sanity check
+echo -ne "Checking if pip is installed..."
+sleep 2
+return=`dpkg -l python3-pip`
+returnval=$?
+if [ "$returnval" -ne 0 ]; then
+	echo "No."
+	echo -ne "Installing python3-pip..."
+	sudo apt-get install python3-pip -y
+	echo "Done."
+else		
+	echo "Yes."
+fi
+
 # Check python3 dependencies
 return=`pip list | grep "Flask"`
 returnval=$?
@@ -36,6 +50,27 @@ else
 	echo "Flask_SQLAlchemy is installed."
 fi
 
+return=`pip list | grep "PyJWT"`
+returnval=$?
+if [ "$returnval" -ne 0 ]; then
+	echo -ne "Installing PyJWT..."
+	pip -qqq install jwt
+	echo "Done."
+else
+	echo "PyJWT is installed."
+fi
+
+
+return=`pip list | grep "psutil"`
+returnval=$?
+if [ "$returnval" -ne 0 ]; then
+	echo -ne "Installing psutil..."
+	pip -qqq install psutil
+	echo "Done."
+else
+	echo "psutil is installed."
+fi
+
 
 return=`pip list | grep "passlib"`
 returnval=$?
@@ -51,7 +86,7 @@ return=`dpkg -l uwsgi`
 returnval=$?
 if [ "$returnval" -ne 0 ]; then
 	echo -ne "Installing uwsgi..."
-	sudo apt-get install uwsgi -y
+	sudo apt-get -q install uwsgi -y
 	echo "Done."
 else
 	echo "uWSGI is installed."
@@ -61,10 +96,20 @@ return=`dpkg -l uwsgi-plugin-python3`
 returnval=$?
 if [ "$returnval" -ne 0 ]; then
 	echo -ne "Installing uwsgi-plugin-python3..."
-	sudo apt-get install uwsgi-plugin-python3 -y
+	sudo apt-get -q install uwsgi-plugin-python3 -y
 	echo "Done."
 else
 	echo "uWSGI-plugin-python3 is installed."
+fi
+
+return=`dpkg -l lmsensors`
+returnval=$?
+if [ "$returnval" -ne 0 ]; then
+	echo -ne "Installing lm-sensors..."
+	sudo apt-get -q install uwsgi-plugin-python3 -y
+	echo "Done."
+else
+	echo "lm-sensors is installed."
 fi
 
 
@@ -109,7 +154,17 @@ sleep 7
 echo "Shutting down remrig..."
 uwsgi --stop /tmp/remrig.pid
 echo "Done."
-sleep 1
+sleep 2
+echo -ne "Would you likke to run 'sensors-detect' now? (y/n): "
+read sanswer
+
+if [ ${sanswer^^}} == "Y" ]; then
+	sudo sensors-detect
+else 
+	echo "Okay. Remrig may not report CPU temp without first running sensors-detect."
+fi
+
+
 echo " "
 echo "--------------------------------------------------------------------"
 echo "                        Setup is complete.                          "

@@ -4,10 +4,14 @@ import os
 import pwd
 import subprocess
 import time
-import jwt
 import psutil
+import re
+import json
+import jwt
 
-from subprocess import Popen
+from shlex import split
+
+from subprocess import Popen, PIPE
 from flask import Flask, abort, request, jsonify, g, url_for
 from flask_sqlalchemy import SQLAlchemy
 from passlib.apps import custom_app_context as pwd_context
@@ -124,6 +128,20 @@ def action_xmrig():
         return jsonify("Stop")
     else:
         return page_not_found(404)
+
+@app.route('/api/sensors', methods=['GET'])
+@auth.login_required
+def sensors():
+    p1 = Popen(split("sensors"), stdout=PIPE)
+    p2 = Popen(split("grep 'Package id 0:'"), stdin=p1.stdout, stdout=PIPE)
+    #for line in iter(p2.stdout.readline, ''):
+    #    print(line
+    #p2.stdout.close()
+    templine = p2.communicate()
+    temp = templine[0].decode('utf-8')
+    cputemp = re.findall("\+[0-9]*\.[0-9].C", temp)
+    #print("THIS IS YOUR TEMP: %s" % json.dumps(jsonify(cputemp).text, sort_keys = False, indent = 2))
+    return jsonify(cputemp[0])
 
 @app.errorhandler(404)
 def page_not_found(e):
