@@ -77,13 +77,20 @@ We have integrated this feature into our **Monerado** app which is available at:
 
 This allows for control of your *xmrig* instances via our app. **Note**: This app is only designed for Monero Ocean at the moment. More pools will be added in the future. 
 
-####Note
+####Note (CPU TEMP)
 We have added support in **remrig** and **Monerado** for lm-sensors. This will report the CPU temp within the app using **remrig**. The setup file will instruct you on how to obtain this, if you haven't already setup *lm-sensors*.
+
+##### Supported CPUs
+* Intel Family
+* AMD Family 11-17+ (new update)
+* Possibly more
+
+### Team Remrig
 
 ![https://i.imgur.com/eFTBooF.png](https://i.imgur.com/eFTBooF.png)
 
 
-### Buy us a coffe (or two)
+### Help support Monerado and Remrig
 
 ![https://i.imgur.com/2eZdcrV.png](https://i.imgur.com/2eZdcrV.png)
 

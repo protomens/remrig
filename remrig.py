@@ -21,6 +21,7 @@ from itsdangerous import (TimedJSONWebSignatureSerializer
 
 
 from werkzeug.security import generate_password_hash, check_password_hash
+from _queue import Empty
 
 # initialization
 app = Flask(__name__)
@@ -132,6 +133,8 @@ def action_xmrig():
 @app.route('/api/sensors', methods=['GET'])
 @auth.login_required
 def sensors():
+    
+    # Intel 
     p1 = Popen(split("sensors"), stdout=PIPE)
     p2 = Popen(split("grep 'Package id 0:'"), stdin=p1.stdout, stdout=PIPE)
     #for line in iter(p2.stdout.readline, ''):
@@ -139,6 +142,22 @@ def sensors():
     #p2.stdout.close()
     templine = p2.communicate()
     temp = templine[0].decode('utf-8')
+    
+    # Support for AMD Family > 17
+    if not temp:
+        p1 = Popen(split("sensors"), stdout=PIPE)
+        p2 = Popen(split("grep 'Tdie'"), stdin=p1.stdout, stdout=PIPE)
+        templine = p2.communicate()
+        temp = templine[0].decode('utf-8')        
+        # Support for AMD Family < 17
+        if not temp:            
+            p1 = Popen(split("sensors"), stdout=PIPE)
+            p2 = Popen(split("grep 'temp1'"), stdin=p1.stdout, stdout=PIPE)
+            templine = p2.communicate()
+            temp = templine[0].decode('utf-8')
+            
+    
+    
     cputemp = re.findall("\+[0-9]*\.[0-9].C", temp)
     #print("THIS IS YOUR TEMP: %s" % json.dumps(jsonify(cputemp).text, sort_keys = False, indent = 2))
     return jsonify(cputemp[0])
