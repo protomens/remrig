@@ -9,7 +9,7 @@
 #openssl ecparam -out ec_key.pem -name secp256r1 -genkey
 #openssl req -new -key ec_key.pem -x509 -nodes -days 365 -out cert.pem 
 
-# curl -k -u xmrig:TfkN8uKRkHM+G2bd01lfXw== -i -X GET "https://192.168.1.235:5001/api/sensors"
+# curl -k -u xmrig:password -i -X GET "https://192.168.4.69:5001/api/sensors"
 
 
 if [[ "$#" -lt 1 ]]; then
