@@ -32,8 +32,12 @@ print(DBFile)
 app.config['SECRET_KEY'] = '3dQr8K7L3oyjsAIFyvlAZb2kGXLEkqA+87V4Zsq9Fys='
 app.config['SQLALCHEMY_DATABASE_URI'] = DBFile
 app.config['SQLALCHEMY_COMMIT_ON_TEARDOWN'] = True
-
-
+XMRLOGFILE='/tmp/xmrig.log'
+CoinAlgoDict = {"cn-heavy/xhv" : "BLOC/XHV" , "ethash" : "ETH", "kawpow" : "RVN", "autolykos2" : "ERG",
+                "cn/gpu" : "CCX/RYO/XEQ", "panthera" : "XLA", "argon2/chukwav2" : "TRTL", "cn-pico/trtl" : "IRD",
+                "c29i" : "GRIN/XBG", "rx/0" : "XMR", "cn/rwz" : "GRFT", "c29v" : "XMV", "cn/r" : "LTHN/SUMO",
+                "c29s" :"XTNC/XWP", "rx/arq" : "ARQ", "astrobwt" : "DERO", "c29b" : "TUBE", "rx/wow" : "WOW",
+                "cn/half" : "MSR"}
 # extensions
 db = SQLAlchemy(app)
 auth = HTTPBasicAuth()
@@ -122,7 +126,7 @@ def action_xmrig():
         if checkIfProcessRunning("xmrig"):
             return jsonify("Start")
         else:
-            Popen(["sudo", "nice", "xmrig"])        
+            Popen(["sudo", "nice", "xmrig", "--log-file=" + XMRLOGFILE])        
             return jsonify("Start")
     elif action.upper() == "STOP":
         Popen(["sudo",  "pkill", "-SIGTERM", "xmrig"])
@@ -162,6 +166,41 @@ def sensors():
     #print("THIS IS YOUR TEMP: %s" % json.dumps(jsonify(cputemp).text, sort_keys = False, indent = 2))
     return jsonify(cputemp[0])
 
+@app.route('/api/coin', methods=['GET'])
+@auth.login_required
+def lastcoin():
+    CoinsMined = []
+    log_file_size = os.path.getsize(XMRLOGFILE)
+    from sqlalchemy.engine import strategies
+    with open(XMRLOGFILE, "r") as XMRLOG:
+        XMRLOG.seek(log_file_size - 4447, 0)
+        xmrig_log_file = XMRLOG.readlines()
+    
+    
+    regalgo = re.compile('algo.(.*).height')
+    for line in xmrig_log_file:
+        lastCoin = regalgo.search(line)
+        if lastCoin is not None:
+            CoinsMined.append(lastCoin.group(1))
+    
+    return jsonify(CoinAlgoDict[CoinsMined[-1]])
+
+@app.route('/api/mem', methods=['GET'])
+@auth.login_required
+def meminfo(): 
+
+    p1 = Popen(split("free -m"), stdout=PIPE)
+    p2 = Popen(split("tail -2"), stdin=p1.stdout, stdout=PIPE)
+    p3 = Popen(split("head -1"), stdin=p2.stdout, stdout=PIPE)
+    p4 = Popen(split("cut -c 73-"), stdin=p3.stdout, stdout=PIPE) 
+    
+    templine = p4.communicate()
+    availmem = templine[0].decode('utf-8')
+    availmem = availmem.replace(" ", "")
+    availmem = availmem.replace("\n", " ")
+    
+    return jsonify(availmem)
+    
 @app.errorhandler(404)
 def page_not_found(e):
     return "<h1>404</h1><p>The resource could not be found.</p>", 404
